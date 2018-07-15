@@ -310,17 +310,15 @@ def compute_membership_strengths(knn_indices, knn_dists, sigmas, rhos):
     for i in range(n_samples):
         for j in range(n_neighbors):
             if knn_indices[i, j] == -1:
-                continue  # We didn't get the full knn for i
-            if knn_indices[i, j] == i:
-                val = 0.0
-            elif knn_dists[i, j] - rhos[i] <= 0.0:
-                val = 1.0
-            else:
-                val = np.exp(-((knn_dists[i, j] - rhos[i]) / (sigmas[i])))
+                continue
 
             rows[i * n_neighbors + j] = i
             cols[i * n_neighbors + j] = knn_indices[i, j]
-            vals[i * n_neighbors + j] = val
+
+            if knn_dists[i, j] - rhos[i] <= 0.0:
+                vals[i * n_neighbors + j] = 1.0
+            elif knn_indices[i, j] != i:
+                vals[i * n_neighbors + j] = np.exp(-((knn_dists[i, j] - rhos[i]) / sigmas[i]))
 
     return rows, cols, vals
 
